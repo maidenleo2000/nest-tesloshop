@@ -6,6 +6,8 @@ import { User } from './entities/user.entity';
 
 import * as bcrypt from 'bcrypt'
 import { LoginUserDto } from './dto/login-user.dto';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
@@ -13,7 +15,9 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+
+    private readonly jwtService: JwtService,
   ){}
 
 
@@ -32,7 +36,13 @@ export class AuthService {
       await this.userRepository.save(user);
       delete user.password;
 
-      return user
+      // return user;
+
+      return {
+        ...user,
+        // token: this.getJwtToken({email: user.email})
+        token: this.getJwtToken({id: user.id})
+      }
 
       //TODO retornar JWT de acceso
 
@@ -53,8 +63,9 @@ export class AuthService {
 
     //para devolver solamente la informacion que quiero
     const user = await this.userRepository.findOne({ 
+      // where: {email},
       where: {email},
-      select:{ email: true, password: true }
+      select:{ email: true, password: true, id: true }
      });
 
      if(!user){
@@ -65,11 +76,24 @@ export class AuthService {
      if(!bcrypt.compareSync(password, user.password)){
       throw new UnauthorizedException('Credentials are not valid (password)');
      }
-    return user
+    // return user
     //TODO retornar el JWT de acceso
+
+    return {
+      ...user,
+      token: this.getJwtToken({id: user.id})
+    }
 
   }
 
+
+  private getJwtToken(payload: JwtPayload){
+
+    const token = this.jwtService.sign(payload);
+    return token;
+
+
+  }
 
 
 
