@@ -13,7 +13,7 @@ export class SeedController {
   @Get()
 
   //TODO de esta forma en la linea 16 ya se valida que el usuario tenga el rol de admin para ejecutar el seed
-  @Auth(ValidRoles.admin)
+  // @Auth(ValidRoles.admin)
   executeSeed() {
     return this.seedService.runSeed()
   }

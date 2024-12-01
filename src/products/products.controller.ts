@@ -6,6 +6,8 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Auth } from 'src/auth/decorators/auth.decorator';
 import { ValidRoles } from 'src/auth/interfaces/valid-roles';
 import { authenticate } from 'passport';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { User } from 'src/auth/entities/user.entity';
 
 @Controller('products')
 //TODO Colocando aca el @Auth solo ven los productos quienes esten autenticados
@@ -15,9 +17,14 @@ export class ProductsController {
 
   @Post()
   //! Para crear tiene que ser usuario o admin para la prueba
-  @Auth(ValidRoles.admin)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  // @Auth(ValidRoles.admin)
+  @Auth()
+  create(
+    @Body() createProductDto: CreateProductDto,
+    @GetUser() user: User,
+  
+  ) {
+    return this.productsService.create(createProductDto, user);
   }
 
   @Get()
@@ -36,8 +43,9 @@ export class ProductsController {
   @Auth(ValidRoles.admin)
   update(
     @Param('id', ParseUUIDPipe) id: string, 
-    @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+    @Body() updateProductDto: UpdateProductDto,
+    @GetUser() user: User) {
+    return this.productsService.update(id, updateProductDto, user);
   }
 
   @Delete(':id')

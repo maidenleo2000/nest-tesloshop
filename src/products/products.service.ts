@@ -8,6 +8,7 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { validate as uuid } from 'uuid';
 import { isUUID } from 'class-validator';
 import { ProductImage } from './entities';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -24,7 +25,7 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) { }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto, user: User) {
 
     try {
 
@@ -40,7 +41,7 @@ export class ProductsService {
       const product = this.productsRepository.create({
         ...productDetails,
         images: images.map(image => this.productsImageRepository.create({url: image})), //se crean las imagenes
-
+        user: user,
       }); //Crea la instancia del producto.
 
       await this.productsRepository.save(product); //Aca se graba la instancia.
@@ -127,7 +128,7 @@ export class ProductsService {
 
 
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
     // return `This action updates a #${id} product`;
 
     //Query Runner: Sirve para ejecutar queries de forma mas rapida.
@@ -161,6 +162,7 @@ export class ProductsService {
         // product.images = await this.productsImageRepository.findBy({product: {id}}); //trae las imagenes, se puede hacer de esta forma o con el return this.findOnePlain(id);. Esa forma es mejor porque ya trae los datos en texto plano, aca tendriamos que procesarlas sino porque vuelve como objeto.
       }
 
+      product.user = user; //TODO Agrega el usuario
       await queryRunner.manager.save(product); //Aca se graba la instancia.
 
       await queryRunner.commitTransaction(); //Termina la transacción
