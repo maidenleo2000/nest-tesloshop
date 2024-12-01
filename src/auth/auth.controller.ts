@@ -26,6 +26,12 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
+  @Get('check-status')
+  @Auth()
+  checkAuthStatus(@GetUser() user: User) {
+    return this.authService.checkAuthStatus(user);
+  }
+
   @Get('private')
   @UseGuards(AuthGuard()) //Esta linea valida que el usuario tenga que estar logueado para poder ver la ruta
   testingPrivateRoute(
